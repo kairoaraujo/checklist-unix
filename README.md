@@ -24,12 +24,12 @@ instalado.
          -g       : Gera checklist
          -cd      : Compara checklist de uma data especifica (DDMMAAAA.hhmm)
          -cl      : Lista arquivos com datas disponiveis
-         -e       : Coleta arquivos de logs e armazena no diretorio especifico
-         -pe      : Informa os logs do Ultimo dia
-         -ped     : Imprime os logs do dia especificado (DDMMAAAA)
+         -e       : (nao implementado) Coleta arquivos de logs e armazena no diretorio especifico
+         -pe      : (nao implementado) Informa os logs do Ultimo dia
+         -ped     : (nao implementado) Imprime os logs do dia especificado (DDMMAAAA)
          -r       : Realiza rotate dos logs:
                     logs com 90 dias ou mais são excluidos
-         -s       : Exibe status do servidor no momento
+         -s       : (nao implementado) Exibe status do servidor no momento
 
 ## Desenvolvimento
 
@@ -37,10 +37,10 @@ checklist-unix.sh é o core, ele utiliza Shell Scripting.
 
 ### Modulos
 
-Para criar modulos, basta seguir o mod_modelo.sh, utilizando shell script.
+Par-a criar modulos, basta seguir o mod_modelo.sh, utilizando shell script.
 Basicamente, ele segue a seguinte regra:
 
-1. Dentro da funcao geracheck() criar o comando
+1 - Dentro da funcao geracheck() criar o comando
 
 nome_arquivo {NOME_DO_ARQUIVO}
  {COMANDO} > $CHKU_GFILE
@@ -58,7 +58,7 @@ Exemplo:
     file_name netstat_anv
     netstat -anv > $CHKU_GFILE
 
-2. Adicionar lista de arquivos
+2 - Adicionar lista de arquivos
 
 Adicionar no FILES_NAMES="" o nome do {NOME_DO_ARQUIVO} utilizados
 
@@ -68,4 +68,4 @@ FILE_NAMES="
     hostname df_h
     "
 
-3. Na duvida, veja o modelo.
+3 - Na duvida, veja o modelo.
