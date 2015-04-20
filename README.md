@@ -63,6 +63,7 @@ Exemplo:
 Adicionar no FILES_NAMES="" o nome do {NOME_DO_ARQUIVO} utilizados
 
  Exemplo:
+ 
     FILE_NAMES="
     netstat_nav
     hostname df_h
