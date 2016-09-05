@@ -1,72 +1,70 @@
 # checklist-unix
 
-Este é um conjunto de scripts criado de forma modular para gerar checklist e 
-e comparar com datas.
+This is a group of scripts to make a checklist of server and compare those datas
 
-Atualmente ele possui módulos para Linux, AIX, HP-UX, Solaris e MacOS.
-Para criar modulos, veja mais abaixo.
+The current version has module for Linux, AIX, HP-UX, Solaris e MacOS.
 
+## Installation
 
-## Instalação
-
-1. Descompactar o checklist-unix em um diretório.
-2. Alterar a variável CHKU_PATH no checklist-unix.sh conforme o diretório 
-instalado.
+1. Uncompress the script.
+2. Change the variable CHKU_PATH on checklist-unix.sh
  
 
-## Como utilizar
+## Usage
 
 
-    Usage:
-         -h       : exibe este help
-         -v       : versao do checklist
-         -c       : Compara checklist
-         -g       : Gera checklist
-         -cd      : Compara checklist de uma data especifica (DDMMAAAA.hhmm)
-         -cl      : Lista arquivos com datas disponiveis
-         -e       : (nao implementado) Coleta arquivos de logs e armazena no diretorio especifico
-         -pe      : (nao implementado) Informa os logs do Ultimo dia
-         -ped     : (nao implementado) Imprime os logs do dia especificado (DDMMAAAA)
-         -r       : Realiza rotate dos logs:
-                    logs com 90 dias ou mais são excluidos
-         -s       : (nao implementado) Exibe status do servidor no momento
+		Usage:
+         -h       : help
+		 -v	  	  : version
+         -c       : Compare checklist (two lasts)
+         -g       : Make the checklist
+         -cd      : Compare recently checklist with specific date (DDMMAAAA.hhmm)
+         -cl      : List all available checklist dates
+         -r       : Logs rotate
+                    Default config: compress > 30 days
+                                    remove > 60 days
+                    edit checklist-unix to change the retention
 
-## Desenvolvimento
+## Development
 
-checklist-unix.sh é o core, ele utiliza Shell Scripting.
+checklist-unix.sh is the core and on folder modules has the OS modules
 
-### Modulos
+### Modules
 
-Par-a criar modulos, basta seguir o mod_modelo.sh, utilizando shell script.
-Basicamente, ele segue a seguinte regra:
+1. Create the command
 
-1 - Dentro da funcao geracheck() criar o comando
+ file_name {FILE_NAME}
+ {COMMAND} > $CHKU_GFILE
 
-nome_arquivo {NOME_DO_ARQUIVO}
- {COMANDO} > $CHKU_GFILE
+   Rules for {FILE_NAME}
 
-Regras para o {NOME_DO_ARQUIVO}
-    a. todo minusculo
-    b. nao utiliza espaco ou caracteres especiais, apenas _ é permitido
-    c. use de forma mais clara possivel seguindo as regras acima
+               a. low case
 
-Regras para o {COMANDO}
-    a. saida final deve ser encaminhado para a variavel $CHKU_GFILE
+               b. do not use special characters, only _ is permitted.
 
-Exemplo:
+               c. be clear
 
-    file_name netstat_anv
-    netstat -anv > $CHKU_GFILE
+   Rules for {COMMANDO}
 
-2 - Adicionar lista de arquivos
+       a. the final output needs to be send to variable $CHKU_GFILE
 
-Adicionar no FILES_NAMES="" o nome do {NOME_DO_ARQUIVO} utilizados
+ Example 1:
 
- Exemplo:
- 
+       file_name netstat_anv
+       netstat -anv > $CHKU_GFILE
+
+ Example 2: (with conditional)
+
+       if [ -f /usr/sbin/prtconf ]
+       then
+	        file_name prtconf
+	        /usr/sbin/prtconf >$CHKU_GFILE
+       fi
+
+ 2. Put the FILE_NAME on FILE_NAMES=""
+
+ Example:
     FILE_NAMES="
     netstat_nav
-    hostname df_h
+    prtconf
     "
-
-3 - Na duvida, veja o modelo.

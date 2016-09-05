@@ -1,42 +1,55 @@
 #!/bin/sh
 #
-# mod_SunOS.sh
 # checklist-unix
 #
-# Created by kairo.araujo on 29/06/10.
+# Kairo Araujo (c) 2010
 #
 ##############################################################################
 #
-# geracheck()
+# mkcheck()
 #
-# 1. Criar comando
+# 1. Create the command
 #
-# nome_arquivo {NOME_DO_ARQUIVO}
-# {COMANDO} > $CHKU_GFILE
+# file_name {FILE_NAME}
+# {COMMAND} > $CHKU_GFILE
 #
-#   Regras para o {NOME_DO_ARQUIVO}
-#               a. todo minusculo
-#               b. nao utiliza espaco ou caracteres especiais, apenas _
-#               c. use de forma mais clara possivel seguindo as regras acima
+#   Rules for {FILE_NAME}
 #
-#       Regras para o {COMANDO}
-#       a. saida final deve ser encaminhado para a variavel $CHKU_GFILE
+#               a. low case
 #
-# Exemplo:
+#               b. do not use special characters, only _ is permitted.
 #
-#       nome_arquivo netstat_anv
+#               c. be clear
+#
+#   Rules for {COMMANDO}
+#
+#       a. the final output needs to be send to variable $CHKU_GFILE
+#
+# Example 1:
+#
+#       file_name netstat_anv
 #       netstat -anv > $CHKU_GFILE
 #
-# 2. Adicionar lista de arquivos
+# Example 2: (with conditional)
 #
-# Adicionar no FILES_NAMES="" o nome do {NOME_DO_ARQUIVO} utilizados
+#       if [ -f /usr/sbin/prtconf ]
+#       then
+#	        file_name prtconf
+#	        /usr/sbin/prtconf >$CHKU_GFILE
+#       fi
 #
-# Exemplo:
+# 2. Put the FILE_NAME on FILE_NAMES=""
+#
+# Example:
 #    FILE_NAMES="
-#        netstat_nav hostname df_h
+#    netstat_nav
+#    prtconf
 #    "
+###############################################################################
+#
+#
 
-geracheck ()
+mkcheck ()
 {
 
    nome_arquivo "hostname_do_servidor"
@@ -178,7 +191,7 @@ fi
 
 }
 
-FILES_NAMES="
+FILE_NAMES="
 hostname_do_servidor
 versionamento_do_servidor
 analise_do_mirror

@@ -1,136 +1,142 @@
-#!/bin/ksh
-# mod_AIX.sh
+#!/bin/sh
+#
 # checklist-unix
 #
-# Created by kairo.araujo on 29/06/10.
+# Kairo Araujo (c) 2010
 #
 ##############################################################################
 #
-# geracheck()
+# mkcheck()
 #
-# 1. Criar comando
+# 1. Create the command
 #
-# nome_arquivo {NOME_DO_ARQUIVO} 
-# {COMANDO} > $CHKU_GFILE
+# file_name {FILE_NAME}
+# {COMMAND} > $CHKU_GFILE
 #
-#   Regras para o {NOME_DO_ARQUIVO}
+#   Rules for {FILE_NAME}
 #
-#               a. todo minusculo
+#               a. low case
 #
-#               b. nao utiliza espaco ou caracteres especiais, apenas _ é permitido
+#               b. do not use special characters, only _ is permitted.
 #
-#               c. use de forma mais clara possivel seguindo as regras acima
+#               c. be clear
 #
-#       Regras para o {COMANDO}
+#   Rules for {COMMANDO}
 #
-#       a. saida final deve ser encaminhado para a variavel $CHKU_GFILE
+#       a. the final output needs to be send to variable $CHKU_GFILE
 #
-# Exemplo:
+# Example 1:
 #
 #       file_name netstat_anv
 #       netstat -anv > $CHKU_GFILE
 #
-# 2. Adicionar lista de arquivos
+# Example 2: (with conditional)
 #
-# Adicionar no FILES_NAMES="" o nome do {NOME_DO_ARQUIVO} utilizados
+#       if [ -f /usr/sbin/prtconf ]
+#       then
+#	        file_name prtconf
+#	        /usr/sbin/prtconf >$CHKU_GFILE
+#       fi
 #
-# Exemplo: 
+# 2. Put the FILE_NAME on FILE_NAMES=""
+#
+# Example:
 #    FILE_NAMES="
 #    netstat_nav
-#     hostname df_h
+#    prtconf
 #    "
 ###############################################################################
 #
 #
-geracheck() 
+mkcheck() 
 
 {
 
 # hostname
-nome_arquivo "hostname"
+file_name "hostname"
 hostname >$CHKU_GFILE
 
 # uname
-nome_arquivo "uname_-a"
+file_name "uname_-a"
 uname -a >$CHKU_GFILE
 
 # df -k
-nome_arquivo "df_-k"
+file_name "df_-k"
 df -k | awk '{ print $1"\t"$7 }'  >$CHKU_GFILE
 
 # ifconfig -a
-nome_arquivo "ifconfig_-a"
+file_name "ifconfig_-a"
 ifconfig -a >$CHKU_GFILE
 
 # netstat -nr
-nome_arquivo "netstat_-nr"
+file_name "netstat_-nr"
 netstat -nr | awk '{ print $1 "\t" $2 "\t" $3 "\t" $6 }' >$CHKU_GFILE
 
 # lsvg (vgs)
-nome_arquivo "lsvg"
+file_name "lsvg"
 lsvg >$CHKU_GFILE
 
 # lsvg (vgs) ativos
-nome_arquivo "lsvg_ativos" 
+file_name "lsvg_ativos" 
 lsvg -o|lsvg -il >$CHKU_GFILE
 
 # lspv (discos)
-nome_arquivo "lspv"
+file_name "lspv"
 lspv >$CHKU_GFILE
 
 # crontab
-nome_arquivo "crontab"
+file_name "crontab"
 crontab -l >$CHKU_GFILE
 
 # hosts
-nome_arquivo "hosts"
+file_name "hosts"
 cat /etc/hosts >$CHKU_GFILE
 
 # qconfig (impressao)
-nome_arquivo "qconfig" 
+file_name "qconfig" 
 cat /etc/qconfig >$CHKU_GFILE
 
 # resolv.conf (dns client)
-nome_arquivo "resolv_dns_client"
+file_name "resolv_dns_client"
 cat /etc/resolv.conf >$CHKU_GFILE
 
 # netsvc (ordem resolução de nomes)
-nome_arquivo "netsvc"
+file_name "netsvc"
 cat /etc/netsvc.conf >$CHKU_GFILE
 
 # lista pacotes (lslpp)
-nome_arquivo "lslpp_-l"
+file_name "lslpp_-l"
 lslpp -l >$CHKU_GFILE
 
 # lista devices
-nome_arquivo "lsdev-C"
+file_name "lsdev-C"
 lsdev -C >$CHKU_GFILE
 
 # maymap
 if [ -f /usr/bin/maymap ]
 then
-	nome_arquivo "maymap_-ap_-4"
+	file_name "maymap_-ap_-4"
 	maymap -ap -4 >$CHKU_GFILE
 
-	nome_arquivo "maymap_-ah_-4"
+	file_name "maymap_-ah_-4"
 	maymap -ah -4 >$CHKU_GFILE
 fi
 
 # prtconf
 if [ -f /usr/sbin/prtconf ]
 then
-	nome_arquivo "prtconf"
+	file_name "prtconf"
 	/usr/sbin/prtconf >$CHKU_GFILE
 fi
 
 # netstat
-nome_arquivo "netstat"
+file_name "netstat"
 netstat -vn|awk ' $1 ~ /ETHERNET/ || $2 ~ /Speed/ {print $0}' >$CHKU_GFILE
 
 # vmo
 if [ -f /usr/sbin/vmo ]
 then
-	nome_arquivo "vmo_-r_-a"
+	file_name "vmo_-r_-a"
 	/usr/sbin/vmo -r -a | grep -v pinnable_frames >$CHKU_GFILE
 fi
 
@@ -138,113 +144,113 @@ fi
 # no
 if [ -f /usr/sbin/no ]
 then
-	nome_arquivo "no_-r_-a"
+	file_name "no_-r_-a"
 	/usr/sbin/no -r -a >$CHKU_GFILE
 fi
 
 # ioo
 if [ -f /usr/sbin/ioo ]
 then
-	nome_arquivo "ioo_-r_-a"
+	file_name "ioo_-r_-a"
 	/usr/sbin/ioo -r -a >$CHKU_GFILE
 fi
 
 # nfso
 if [ -f /usr/sbin/nfso ]
 then
-	nome_arquivo "nfso_-r_-a"
+	file_name "nfso_-r_-a"
 	/usr/sbin/nfso -r -a >$CHKU_GFILE
 fi
 
 # schedo
 if [ -f /usr/sbin/schedo ]
 then
-	nome_arquivo "schedo"
+	file_name "schedo"
 	/usr/sbin/schedo -r -a >$CHKU_GFILE
 fi
 
 # lsfs
 if [ -f /usr/sbin/lsfs ]
 then
-	nome_arquivo "lsfs"
+	file_name "lsfs"
 	/usr/sbin/lsfs -q >$CHKU_GFILE
 fi
 
 # sysdumpdev
 if [ -f /usr/bin/sysdumpdev ]
 then
-	nome_arquivo "sysdumpdev_-l"
+	file_name "sysdumpdev_-l"
 	/usr/bin/sysdumpdev -l >$CHKU_GFILE
 fi
 
 # lssrc
 if [ -f  /usr/bin/lssrc ]
 then
-	nome_arquivo "lssrc_-a"
+	file_name "lssrc_-a"
 	/usr/bin/lssrc -a >$CHKU_GFILE
 fi
 
 # lslicense
 if [ -f /usr/bin/lslicense ]
 then
-	nome_arquivo "lslicense_-c"
+	file_name "lslicense_-c"
 	/usr/bin/lslicense -c  >$CHKU_GFILE
 fi
 
 # sendmail
 if [ -f /etc/sendmail.cf ]
 then
-	nome_arquivo "sendmail"
+	file_name "sendmail"
 	cat /etc/sendmail.cf  >$CHKU_GFILE
 fi
 
 # showmount
 if [ -f /usr/bin/showmount ]
 then
-	nome_arquivo "showmount_-e"
+	file_name "showmount_-e"
 	/usr/bin/showmount -e >$CHKU_GFILE
 fi
 
 # exportfs
 if [ -f /usr/sbin/exportfs ]
 then
-	nome_arquivo "exportfs"
+	file_name "exportfs"
 	/usr/sbin/exportfs -v >$CHKU_GFILE
 fi
 
 # filesystem
 if [ -f /etc/filesystems ]
 then
-	nome_arquivo "filesystems"
+	file_name "filesystems"
 	cat /etc/filesystems >$CHKU_GFILE
 fi
 
 # lspath
 if [ -f /usr/sbin/lspath ]
 then
- 	nome_arquivo "lspath_-H"
+ 	file_name "lspath_-H"
 	/usr/sbin/lspath -H >$CHKU_GFILE
 fi
 
 # powermt
 if [ -f /usr/sbin/powermt ]
 then
-	nome_arquivo "powermt_version"
+	file_name "powermt_version"
 	/usr/sbin/powermt version >$CHKU_GFILE
 
-	nome_arquivo "powermt_display"
+	file_name "powermt_display"
  	/usr/sbin/powermt display >$CHKU_GFILE
 
-	nome_arquivo "powermt_display_paths"
+	file_name "powermt_display_paths"
 	/usr/sbin/powermt display paths >$CHKU_GFILE
 	
-	nome_arquivo "powermt_display_options"
+	file_name "powermt_display_options"
 	/usr/sbin/powermt display options >$CHKU_GFILE
 	
-	nome_arquivo "powermt_display_dev_all"
+	file_name "powermt_display_dev_all"
 	/usr/sbin/powermt display dev=all >$CHKU_GFILE
 
-	nome_arquivo "powermt_display_unmanaged"
+	file_name "powermt_display_unmanaged"
 	/usr/sbin/powermt display unmanaged >$CHKU_GFILE
 
 fi
@@ -252,16 +258,16 @@ fi
 # lsrsrc
 if [ -f /usr/bin/lsrsrc  ]
 then
-	nome_arquivo "ibm_management_server"
+	file_name "ibm_management_server"
 	/usr/bin/lsrsrc IBM.ManagementServer >$CHKU_GFILE
 
-	nome_arquivo "ibm_lpar"
+	file_name "ibm_lpar"
 	/usr/bin/lsrsrc IBM.LPAR >$CHKU_GFILE
 
-	nome_arquivo "ibm_host"
+	file_name "ibm_host"
 	/usr/bin/lsrsrc IBM.Host >$CHKU_GFILE
 	
-	nome_arquivo "ibm_wlm"
+	file_name "ibm_wlm"
 	/usr/bin/lsrsrc IBM.WLM >$CHKU_GFILE
 	
 fi
@@ -270,52 +276,52 @@ fi
 if [ -f /usr/es/sbin/cluster/utilities/cldump ]
 then
 
-nome_arquivo "hacmp_cllscf"
+file_name "hacmp_cllscf"
 /usr/sbin/cluster/utilities/cllscf >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllsserv"
+file_name "hacmp_cllsserv"
 /usr/sbin/cluster/utilities/cllsserv >$CHKU_GFILE
 
-nome_arquivo "hacmp_clshowres"
+file_name "hacmp_clshowres"
 /usr/sbin/cluster/utilities/clshowres >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllsnode"
+file_name "hacmp_cllsnode"
 /usr/sbin/cluster/utilities/cllsnode >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllsif"
+file_name "hacmp_cllsif"
 /usr/sbin/cluster/utilities/cllsif >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllsclstr"
+file_name "hacmp_cllsclstr"
 /usr/sbin/cluster/utilities/cllsclstr >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllsvgdata"
+file_name "hacmp_cllsvgdata"
 /usr/sbin/cluster/utilities/cllsvgdata >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllssvcs"
+file_name "hacmp_cllssvcs"
 /usr/sbin/cluster/utilities/cllssvcs >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllsstbys"
+file_name "hacmp_cllsstbys"
 /usr/sbin/cluster/utilities/cllsstbys >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllsclstr"
+file_name "hacmp_cllsclstr"
 /usr/sbin/cluster/utilities/cllsclstr>$CHKU_GFILE
 
-nome_arquivo "hacmp_cllsserv"
+file_name "hacmp_cllsserv"
 /usr/sbin/cluster/utilities/cllsserv >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllssite"
+file_name "hacmp_cllssite"
 /usr/sbin/cluster/utilities/cllssite >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllsfs"
+file_name "hacmp_cllsfs"
 /usr/sbin/cluster/utilities/cllsfs >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllsres"
+file_name "hacmp_cllsres"
 /usr/sbin/cluster/utilities/cllsres >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllslv"
+file_name "hacmp_cllslv"
 /usr/sbin/cluster/utilities/cllslv >$CHKU_GFILE
 
-nome_arquivo "hacmp_cllstape"
+file_name "hacmp_cllstape"
 /usr/sbin/cluster/utilities/cllstape >$CHKU_GFILE
 
 fi
@@ -325,57 +331,57 @@ if [ -f /usr/lpp/mmfs/bin/mmlspv ]
 then
 
 
- 	nome_arquivo "gfs_mmlspv"
+ 	file_name "gfs_mmlspv"
  	/usr/lpp/mmfs/bin/mmlspv >$CHKU_GFILE
 
- 	nome_arquivo "gfs_mmlscluster"
+ 	file_name "gfs_mmlscluster"
  	/usr/lpp/mmfs/bin/mmlscluster >$CHKU_GFILE
 
- 	nome_arquivo "gfs_mmlsconfig"
+ 	file_name "gfs_mmlsconfig"
  	/usr/lpp/mmfs/bin/mmlsconfig >$CHKU_GFILE
 
- 	nome_arquivo "gfs_mmlsmgr"
+ 	file_name "gfs_mmlsmgr"
  	/usr/lpp/mmfs/bin/mmlsmgr >$CHKU_GFILE
 
- 	nome_arquivo "gfs_mmlsnode"
+ 	file_name "gfs_mmlsnode"
  	/usr/lpp/mmfs/bin/mmlsnode -a >$CHKU_GFILE
 
- 	nome_arquivo "gfs_mmlsnsd"
+ 	file_name "gfs_mmlsnsd"
  	/usr/lpp/mmfs/bin/mmlsnsd >$CHKU_GFILE
 fi
 
 # rpm
 if [ -f /usr/bin/rpm ]
 then
- 	nome_arquivo "rpm_-qa"
+ 	file_name "rpm_-qa"
 	/usr/bin/rpm -qa >$CHKU_GFILE
 
 fi
 
 # netstat 
-nome_arquivo "netstat_-an"
+file_name "netstat_-an"
 /usr/bin/netstat -an | grep -i listen>$CHKU_GFILE
 
 # netstat -v
-nome_arquivo "netstat_-v"
+file_name "netstat_-v"
 /usr/bin/netstat -v | egrep -i 'ent|vlan' >$CHKU_GFILE
 
 
 # lscfg
-nome_arquivo "lscfg"
+file_name "lscfg"
 /usr/sbin/lscfg >$CHKU_GFILE
 	
 
 # lparstat
 if [ -f /usr/bin/lparstat ]
 then
-	nome_arquivo "lparstat_-i"
+	file_name "lparstat_-i"
 	/usr/bin/lparstat -i >$CHKU_GFILE
 fi
 
 }
 
-FILES_NAMES="
+FILE_NAME="
 hostname
 uname_-a
 df_-k

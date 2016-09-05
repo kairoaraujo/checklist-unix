@@ -3,54 +3,52 @@
 # checklist-unix.sh
 # checklist-unix
 #
-# Created by kairo.araujo on 10/06/10.
+# Kairo Araujo (c) 2010
 # 
 ##############################################################################
 #
 # GLOBAL VARIABLES
+# checklist-unix Path
 CHKU_PATH=/opt/checklist-unix
-CHKU_MODULES=$CHKU_PATH/modulos
+# checklist-unix retention compress (days)
+CHKU_DAYS_RENTENTION_Z="7"
+# checklist-unix retention remove (days)
+CHKU_DAYS_RENTENTION_R="15"
+CHKU_MODULES=$CHKU_PATH/modules
 CHKU_FILES=$CHKU_PATH/files
 CHKU_LOGS=$CHKU_PATH/logs
 CHKU_SO=`uname`
 CHKU_FILE_CHECKLIST="`hostname`.`date +"%d%m%Y.%H%M"`.checklist"
-CHKU_VERSION="2.6"
+CHKU_VERSION="2.7"
 
 
-# GLOBAL ERRORS
-# exit 2 = Modulo para o sistema operacional não existe
-# exit 3 = Formato de data não está correto
-# exit 4 = Arquivo com a data não existe
-# exit 5 = Executado com usuário diferente do root
-
-
-# INICIO
+# START
 ##############################################################################
 
-# Pre-checagens
-# Verifica se o Sistema Operacional está disponível
+
+# Check if OS module exists
 if [ ! -f $CHKU_MODULES/mod_$CHKU_SO.sh ]; then
 
-	echo "Modulo para o Sistema Operacional nao existe!"
+	echo "Module for Operational System does not exist"
 	echo $CHKU_SO
 	exit 2
 
 fi
 
-# Verifica se o script está sendo executado pelo root
+# check root user
 if [ `whoami` != "root" ]; then
-	echo "Necessita executar como root"
+	echo "Use root to execute"
 	exit 5
 fi 
 
-echo "Usando módulo $CHKU_MODULES/mod_$CHKU_SO.sh ."
-# carrega modulo do sistema operacional
+echo "Using $CHKU_MODULES/mod_$CHKU_SO.sh module."
+# loads OS module
 . $CHKU_MODULES/mod_$CHKU_SO.sh
 
 
-# Funcoes globais
-# Funcao de titulo, para ser utilizado no modulo
-nome_arquivo ()
+# Global functions
+# function subject title
+file_name ()
 {
 	FILE=$*
 	CHKU_GFILE=$CHKU_FILES/$FILE.$CHKU_FILE_CHECKLIST
@@ -58,17 +56,15 @@ nome_arquivo ()
 	echo $FILE | sed 's/_/ /g'
 }
 
-# Funcao de comparar checklists
-comparacheck ()
+# function compare
+check_compare ()
 {
 	case $1 in
 
 		-cd)
 
-		# Compara checklists utilizando datas especificas
-		#
-		# Verifica se o parametro -cd foi especificado
-		for CHECKLIST in $FILES_NAMES;
+		# Compare checklist
+		for CHECKLIST in $FILE_NAMES;
 		do
 		   ls -la $CHKU_FILES/$CHECKLIST.*.checklist >> /dev/null 2>&1
 		   RC=$?
@@ -94,8 +90,8 @@ comparacheck ()
 
 		-c)
 		
-		# Compara checklists utilizando datas especificas
-		for CHECKLIST in $FILES_NAMES;
+		# Check with last date
+		for CHECKLIST in $FILE_NAMES;
 		do
 		   ls -la $CHKU_FILES/$CHECKLIST.*.checklist >> /dev/null 2>&1
                    RC=$?
@@ -121,60 +117,59 @@ comparacheck ()
 	esac
 }
 
-# inicia parametros do checklist-unix
+# options
 case $1 in
 
 	-g)
 		
-		# gera checklist do SO
+		# makes OS checklist
 		echo ""
-		echo "Gerando do checklist do Sistema Operacional - $CHKU_SO"
-		geracheck
+		echo "Starting checklist collecting - $CHKU_SO"
+		mkcheck
 		echo ""
-		echo "Finalizado."
+		echo "Collect finished"
 		
 	;;
 
 	-c)
 
-		# compara os dois ultimos checklists
+		# compare last two checklists
 		echo ""
-		echo "Inciando comparação do checklist (dois últimos)"
+		echo "Starting to compare the checklists (last two)"
 		echo ""
-		comparacheck $1
+		check_compare $1
 		echo ""
-		echo "Finalizado"
+		echo "Compare finished"
 		
 
 	;;
 	
 	-cd)
 	
-		# Verifica se a veriavel DDMMAAAA foi preenchida
+		# Compare with specific date
 		if [ ! -n "$2" ]; then
 			echo ""
-			echo "ERRO 3: Parametro do -cd deve conter uma data no formato DDMMAAAA.hhmm"
-			echo "Exemplo: checklist-unix.sh -cd 10062010.1030"
-			echo "Voce pode verificar as datas existentes, utilize: $0 -cl"
+			echo "ERROR 3: -cd needs to have the format DDMMAAAA.hhmm"
+			echo "Example: checklist-unix.sh -cd 10062010.1030"
+			echo "To list all available dates use: $0 -cl"
 			echo ""
 			exit 3
 		fi
 		
-		# Verifica se o arquivo com a data existe
+		# Check if file date exists
 		if [ ! -f $CHKU_FILES/*.`hostname`.$2.checklist ]; then
 			echo ""
-			echo "ERRO 4: Arquivo para a data $2 nao existe"
-			echo "Voce pode verificar as datas existentes, utilize: $0 -cl"
+			echo "ERROR 4: The file for date $2 not exists"
+			echo "To list all available dates use: $0 -cl"
 			echo ""
 			exit 4
 		fi
-		
-		# Compara com a data especificada ($2 se torna $1 no modulo)
+
 		echo ""
-		echo "Iniciando comparação do checklist - Ultimo com o do dia $2"
+		echo "Starting checklist collecting - Last one with $2"
 		echo ""
-		comparacheck $1 $2
-		echo "Finalizado"
+		check_compare $1 $2
+		echo "Compare finished"
 		echo ""
 	
 		
@@ -182,47 +177,29 @@ case $1 in
 	
 	-cl)
 		
-		# lista datas do arquivos disponíveis
+		# List all available dates
 		echo ""
-		echo "Lista de datas existentes de checklist"
+		echo "Available checklist dates"
 		echo ""
-		ls -la $CHKU_FILES | grep -v .gz |awk -F. '{ print $3"."$4 }' | sort | uniq	
-		echo "Finalizado"
+		ls -la $CHKU_FILES | grep $(hostname) | grep -v .gz |awk -F. '{ print $3"."$4 }' | sort | uniq
+		echo ""
+		echo "List finished"
 		echo ""
 	
 	;;
-	
-	-e)
-		echo "Sera implementada esta funcao no futuro."	
-	;;
-	
-	-pe)
-		echo "Sera implementada esta funcao no futuro."	
-	;;
-	
-	-ped)
-	
-		echo "Sera implementada esta funcao no futuro."		
-	;;
-	
+
 	-r)
 
-		# rotaciona os arquivos
+		# File managements
 
-		# arquivos com mais de 60 dias serao comprimidos
-		echo "Rotacionando arquivos ($CHKU_FILES/*) com mais de 60 dias."
-		find $CHKU_FILES/ -type f -atime +60 -exec gzip -v9 {} ';'
+		# File compress
+		echo "Compressing files ($CHKU_FILES/*) > $CHKU_DAYS_RENTENTION_Z ."
+		find $CHKU_FILES/ -type f -mtime +$CHKU_DAYS_RENTENTION_Z -exec gzip -v9 {} ';'
 
-		# arquivos com mais de 90 dias serao removidos
-		echo "Removendo arquivos ($CHKU_FILES/*) com mais de 90 dias."
-		find $CHKU_FILES/ -type f -atime +90 -exec rm {} ';'
+		# File remove
+		echo "Removing files ($CHKU_FILES/*) > $CHKU_DAYS_RENTENTION_R ."
+		find $CHKU_FILES/ -type f -mtime +CHKU_DAYS_RENTENTION_R -exec rm {} ';'
 
-
-	;;
-	
-	-s)
-
-		echo "Sera implementada esta funcao no futuro."
 	;;
 
 	-v)
@@ -234,18 +211,16 @@ case $1 in
 	h|*)
 		echo "
 		Usage:
-         -h       : exibe este help
-		 -v	  	  : versao do checklist
-         -c       : Compara checklist
-         -g       : Gera checklist
-         -cd      : Compara checklist de uma data especifica (DDMMAAAA.hhmm)
-         -cl      : Lista arquivos com datas disponiveis
-         -e       : Coleta arquivos de logs e armazena no diretorio especifico
-         -pe      : Informa os logs do Ultimo dia
-         -ped     : Imprime os logs do dia especificado (DDMMAAAA)
-         -r       : Realiza rotate dos logs:
-                    logs com 90 dias ou mais são excluidos
-         -s       : Exibe status do servidor no momento
+         -h       : help
+		 -v	  	  : version
+         -c       : Compare checklist (two lasts)
+         -g       : Make the checklist
+         -cd      : Compare recently checklist with specific date (DDMMAAAA.hhmm)
+         -cl      : List all available checklist dates
+         -r       : Logs rotate
+                    Default config: compress > 30 days
+                                    remove > 60 days
+                    edit checklist-unix to change the retention
 		"
 	;;
 esac
