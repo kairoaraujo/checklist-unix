@@ -1,9 +1,8 @@
 #!/bin/sh
 #
 # checklist-unix.sh
-# checklist-unix
 #
-# Kairo Araujo (c) 2010
+# Kairo Araujo (c) 2010-2016
 # 
 ##############################################################################
 #
@@ -14,12 +13,15 @@ CHKU_PATH=/opt/checklist-unix
 CHKU_DAYS_RENTENTION_Z="7"
 # checklist-unix retention remove (days)
 CHKU_DAYS_RENTENTION_R="15"
+
+
+# system variables
 CHKU_MODULES=$CHKU_PATH/modules
 CHKU_FILES=$CHKU_PATH/files
 CHKU_LOGS=$CHKU_PATH/logs
 CHKU_SO=`uname`
 CHKU_FILE_CHECKLIST="`hostname`.`date +"%d%m%Y.%H%M"`.checklist"
-CHKU_VERSION="2.7"
+CHKU_VERSION="2.7.1"
 
 
 # START
@@ -39,7 +41,11 @@ fi
 if [ `whoami` != "root" ]; then
 	echo "Use root to execute"
 	exit 5
-fi 
+fi
+
+if [ ! -d $CHKU_FILES/$(hostname) ]; then
+    mkdir -p $CHKU_FILES/$(hostname)
+fi
 
 echo "Using $CHKU_MODULES/mod_$CHKU_SO.sh module."
 # loads OS module
@@ -51,7 +57,7 @@ echo "Using $CHKU_MODULES/mod_$CHKU_SO.sh module."
 file_name ()
 {
 	FILE=$*
-	CHKU_GFILE=$CHKU_FILES/$FILE.$CHKU_FILE_CHECKLIST
+	CHKU_GFILE=$CHKU_FILES/$(hostname)/$FILE.$CHKU_FILE_CHECKLIST
 	echo "-------------------------------------------------------------------"
 	echo $FILE | sed 's/_/ /g'
 }
@@ -64,14 +70,14 @@ check_compare ()
 		-cd)
 
 		# Compare checklist
-		for CHECKLIST in $FILE_NAMES;
+		for CHECKLIST in $(cat $CHKU_MODULES/mod_$CHKU_SO.sh | grep -v ^# | grep file_name | awk '{ print $2 }');
 		do
-		   ls -la $CHKU_FILES/$CHECKLIST.*.checklist >> /dev/null 2>&1
+		   ls -la $CHKU_FILES/$(hostname)/$CHECKLIST.*.checklist >> /dev/null 2>&1
 		   RC=$?
 		   if [ $RC -eq 0 ]; then
                         LAST=` date +"%d%m%Y"`;
-			CHECK_ITEM_LAST=`ls -ltr $CHKU_FILES/$CHECKLIST.*.$LAST.*.checklist|awk '{print $9}'|tail -1`
-			CHECK_ITEM_DATA=`ls -ltr $CHKU_FILES/$CHECKLIST.*.$2.checklist|awk '{print $9}'|tail -1`
+			CHECK_ITEM_LAST=`ls -ltr $CHKU_FILES/$(hostname)/$CHECKLIST.*.$LAST.*.checklist|awk '{print $9}'|tail -1`
+			CHECK_ITEM_DATA=`ls -ltr $CHKU_FILES/$(hostname)/$CHECKLIST.*.$2.checklist|awk '{print $9}'|tail -1`
 
 			diff $CHECK_ITEM_LAST $CHECK_ITEM_DATA >/dev/null 2>&1
 			RC=$?
@@ -91,12 +97,12 @@ check_compare ()
 		-c)
 		
 		# Check with last date
-		for CHECKLIST in $FILE_NAMES;
+		for CHECKLIST in $(cat $CHKU_MODULES/mod_$CHKU_SO.sh | grep -v ^# | grep file_name | awk '{ print $2 }');
 		do
-		   ls -la $CHKU_FILES/$CHECKLIST.*.checklist >> /dev/null 2>&1
+		   ls -la $CHKU_FILES/$(hostname)/$CHECKLIST.*.checklist >> /dev/null 2>&1
                    RC=$?
                    if [ $RC -eq 0 ]; then
-			CHECK_ITEM=`ls -ltr $CHKU_FILES/$CHECKLIST.*.checklist|awk '{print $9}'|tail -2`
+			CHECK_ITEM=`ls -ltr $CHKU_FILES/$(hostname)/$CHECKLIST.*.checklist|awk '{print $9}'|tail -2`
 
 
 			diff $CHECK_ITEM >/dev/null 2>&1
@@ -157,7 +163,7 @@ case $1 in
 		fi
 		
 		# Check if file date exists
-		if [ ! -f $CHKU_FILES/*.`hostname`.$2.checklist ]; then
+		if [ ! -f $CHKU_FILES/$(hostname)/*.`hostname`.$2.checklist ]; then
 			echo ""
 			echo "ERROR 4: The file for date $2 not exists"
 			echo "To list all available dates use: $0 -cl"
@@ -193,12 +199,12 @@ case $1 in
 		# File managements
 
 		# File compress
-		echo "Compressing files ($CHKU_FILES/*) > $CHKU_DAYS_RENTENTION_Z ."
-		find $CHKU_FILES/ -type f -mtime +$CHKU_DAYS_RENTENTION_Z -exec gzip -v9 {} ';'
+		echo "Compressing files ($CHKU_FILES/$(hostname)/*) > $CHKU_DAYS_RENTENTION_Z ."
+		find $CHKU_FILES/$(hostname)/ -type f -mtime +$CHKU_DAYS_RENTENTION_Z -exec gzip -v9 {} ';'
 
 		# File remove
-		echo "Removing files ($CHKU_FILES/*) > $CHKU_DAYS_RENTENTION_R ."
-		find $CHKU_FILES/ -type f -mtime +CHKU_DAYS_RENTENTION_R -exec rm {} ';'
+		echo "Removing files ($CHKU_FILES/$(hostname)/*) > $CHKU_DAYS_RENTENTION_R ."
+		find $CHKU_FILES/$(hostname)/ -type f -mtime +CHKU_DAYS_RENTENTION_R -exec rm {} ';'
 
 	;;
 
@@ -211,16 +217,16 @@ case $1 in
 	h|*)
 		echo "
 		Usage:
-         -h       : help
-		 -v	  	  : version
-         -c       : Compare checklist (two lasts)
-         -g       : Make the checklist
-         -cd      : Compare recently checklist with specific date (DDMMAAAA.hhmm)
-         -cl      : List all available checklist dates
-         -r       : Logs rotate
-                    Default config: compress > 30 days
-                                    remove > 60 days
-                    edit checklist-unix to change the retention
+		-h   : help
+		-v   : version
+		-c   : Compare checklist (two lasts)
+		-g   : Make the checklist
+		-cd  : Compare recently checklist with specific date (DDMMAAAA.hhmm)
+		-cl  : List all available checklist dates
+		-r   : Logs rotate
+		        Default config: compress > 7 days
+		                        remove > 15 days
+		                        edit checklist-unix.sh to change the retention
 		"
 	;;
 esac

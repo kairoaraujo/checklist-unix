@@ -44,7 +44,7 @@ checklist-unix.sh is the core and on folder modules has the OS modules
 
                c. be clear
 
-   Rules for {COMMANDO}
+   Rules for {COMMAND}
 
        a. the final output needs to be send to variable $CHKU_GFILE
 
