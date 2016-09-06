@@ -38,29 +38,17 @@
 #	        /usr/sbin/prtconf >$CHKU_GFILE
 #       fi
 #
-# 2. Put the FILE_NAME on FILE_NAMES=""
-#
-# Example:
-#    FILE_NAMES="
-#    netstat_nav
-#    prtconf
-#    "
 ###############################################################################
 #
 #
 mkcheck ()
 {
-	nome_arquivo hostname
+	file_name hostname
 	hostname > $CHKU_GFILE
 	
-	nome_arquivo uname_-a
+	file_name uname_-a
 	uname -a > $CHKU_GFILE
 	
 }
-
-# Arquivos gerados, apenas os {FILE_NAME} utilizados
-FILE_NAMES="
-hostname uname_-a
-"
 
 
