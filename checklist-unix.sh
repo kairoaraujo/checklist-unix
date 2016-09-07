@@ -187,7 +187,7 @@ case $1 in
 		echo ""
 		echo "Available checklist dates"
 		echo ""
-		ls -la $CHKU_FILES | grep $(hostname) | grep -v .gz |awk -F. '{ print $3"."$4 }' | sort | uniq
+		ls -la $CHKU_FILES/$(hostname) | grep $(hostname) | grep -v .gz |awk -F. '{ print $3"."$4 }' | sort | uniq
 		echo ""
 		echo "List finished"
 		echo ""
