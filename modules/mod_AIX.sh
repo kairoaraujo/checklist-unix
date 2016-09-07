@@ -121,13 +121,6 @@ then
 	/usr/sbin/prtconf >$CHKU_GFILE
 fi
 
-<<<<<<< HEAD
-=======
-# netstat
-file_name netstat
-netstat -vn|awk ' $1 ~ /ETHERNET/ || $2 ~ /Speed/ {print $0}' >$CHKU_GFILE
-
->>>>>>> 7415848bb7f38ab9657af53f6b09e6006c6fb500
 # vmo
 if [ -f /usr/sbin/vmo ]
 then
@@ -357,14 +350,6 @@ fi
 file_name netstat_-an
 /usr/bin/netstat -an | grep -i listen>$CHKU_GFILE
 
-<<<<<<< HEAD
-=======
-# netstat -v
-file_name netstat_-v
-/usr/bin/netstat -v | egrep -i 'ent|vlan' >$CHKU_GFILE
-
-
->>>>>>> 7415848bb7f38ab9657af53f6b09e6006c6fb500
 # lscfg
 file_name lscfg
 /usr/sbin/lscfg >$CHKU_GFILE
